@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="dist/main.js"></script>
+  </head>
+  <body>
+    <input id="inputFile" type="file" name="file" value="">
+    <div id="output">
+
+    </div>
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', ()=>{
+        new InputFileReader({
+          input: document.getElementById('inputFile')
+        })
+        .onLoaded((fileContent)=>{
+          output.innerHTML = csvjson.getJSON(fileContent)
+        })
+      })
+    </script>
+  </body>
+</html>
