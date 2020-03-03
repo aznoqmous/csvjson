@@ -11,23 +11,28 @@ export default class CSVJson{
   }
 
   getJSON(data){
-    this.config.data = data;
-    this.init()
-    this.do()
+    this.loadCSV(data)
+    console.log(this)
     return this.json()
+  }
+  getCSV(data){
+    this.loadJSON(data)
+    return this.csv()
   }
 
   init(){
     this.fields = []
     this.rows = []
-    this.config.separator = this.guessSeparator(this.config.data)
-    this.config.eol = this.guessEndOfLine(this.config.data)
+    this.config.separator = this.guessSeparator()
+    this.config.eol = this.guessEndOfLine()
   }
   guessEndOfLine(data){
+    data = data || this.config.data
     if(data.split('\r\n').length) return '\r\n';
     else return '\n';
   }
   guessSeparator(data){
+    data = data || this.config.data
     let separators = [',', ';']
     let maxMatchs = 0
     let maxMatchsSeparator = separators[0]
@@ -41,12 +46,7 @@ export default class CSVJson{
     return maxMatchsSeparator;
   }
 
-  do(){
-    if(this.config.isFirstLineFieldName) this.getFields()
-    this.getRows()
-  }
-
-  getFields(){
+  getCSVFields(){
     let firstLine = this.config.data.split(this.config.eol)[0]
     this.fieldLine = firstLine
     this.fields = this.fieldLine.split(this.config.separator)
@@ -62,15 +62,15 @@ export default class CSVJson{
     this.fields = fields
   }
 
-  getRows(){
+  getCSVRows(){
     let textContents = this.config.data.match(new RegExp(`${this.config.separator}${this.config.textDelimiter}[^${this.config.separator}]*\n.*?${this.config.textDelimiter}${this.config.separator}`, 'g'))
     if(textContents) textContents.map( textContent => {
       this.config.data = this.config.data.replace(textContent, textContent.replace(new RegExp('\n', 'g'), this.config.eolToken))
     } )
 
     let rows = this.config.data.split(this.config.eol)
-    rows.map( row => {
-      if(row != this.fieldLine) this.addRow(row)
+    rows.map( (row, i) => {
+      if( !(!i && this.config.isFirstLineFieldName) && row != this.fieldLine) this.addRow(row)
     } )
   }
 
@@ -85,6 +85,16 @@ export default class CSVJson{
     this.rows.push(newRow)
   }
 
+  // imports
+  loadCSV(data){
+    this.config.data = data;
+    this.init()
+    if(this.config.isFirstLineFieldName) this.getCSVFields()
+    this.getCSVRows()
+  }
+  loadJSON(data){
+
+  }
   // exports
   csv(){
     let csv = '';
